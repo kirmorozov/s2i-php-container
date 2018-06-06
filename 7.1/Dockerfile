@@ -41,8 +41,9 @@ LABEL summary="${SUMMARY}" \
       maintainer="SoftwareCollections.org <sclorg@redhat.com>"
 
 # Install Apache httpd and PHP
-RUN yum install -y centos-release-scl && \
+RUN yum install -y centos-release-scl epel-release && \
     INSTALL_PKGS="rh-php71 rh-php71-php rh-php71-php-mysqlnd rh-php71-php-pgsql rh-php71-php-bcmath \
+                  sclo-php71-php-mcrypt sclo-php71-php-pecl-imagick sclo-php71-php-pecl-redis sclo-php71-php-pecl-memcached \
                   rh-php71-php-gd rh-php71-php-intl rh-php71-php-ldap rh-php71-php-mbstring rh-php71-php-pdo \
                   rh-php71-php-process rh-php71-php-soap rh-php71-php-opcache rh-php71-php-xml \
                   rh-php71-php-gmp rh-php71-php-pecl-apcu httpd24-mod_ssl" && \
