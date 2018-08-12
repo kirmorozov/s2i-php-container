@@ -30,6 +30,8 @@ if [ -f composer.json ]; then
   fi
   php <$TEMPFILE
 
+  ./composer.phar global require hirak/prestissimo
+
   if [ "$(ls -a /tmp/artifacts/ 2>/dev/null)" ]; then
     echo "Restoring build artifacts"
     mv /tmp/artifacts/* $HOME/
