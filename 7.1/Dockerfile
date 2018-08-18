@@ -59,6 +59,12 @@ RUN cd /usr/tmp && \
     echo "./autogen.sh && ./configure && make && make install && pecl install mysql_xdevapi" | scl enable devtoolset-7 - && \
     echo "extension=mysql_xdevapi.so" > /etc/opt/rh/rh-php71/php.d/30-mysql_xdevapi.ini
 
+# NewRelic installation
+RUN rpm -Uvh http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm && \
+    yum install -y newrelic-php5 && \
+    newrelic-install install && echo "Installed NewRelic" && \
+    yum clean all -y
+
 ENV PHP_CONTAINER_SCRIPTS_PATH=/usr/share/container-scripts/php/ \
     APP_DATA=${APP_ROOT}/src \
     PHP_DEFAULT_INCLUDE_PATH=/opt/rh/rh-php71/root/usr/share/pear \
