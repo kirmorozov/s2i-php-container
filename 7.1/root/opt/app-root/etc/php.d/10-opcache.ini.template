@@ -64,7 +64,7 @@ opcache.blacklist_filename=${PHP_SYSCONF_PATH}/php.d/opcache*.blacklist
 
 ; Allows exclusion of large files from being cached. By default all files
 ; are cached.
-opcache.max_file_size=1M
+opcache.max_file_size=10M
 
 ; Check the cache checksum each N requests.
 ; The default value of "0" means that the checks are disabled.
