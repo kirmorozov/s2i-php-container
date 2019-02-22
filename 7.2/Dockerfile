@@ -13,7 +13,7 @@ EXPOSE 8443
 
 ENV PHP_VERSION=7.2 \
     PHP_VER_SHORT=72 \
-    NAME=php \
+    NAME=mage \
     PATH=$PATH:/opt/rh/rh-php72/root/usr/bin
 
 ENV SUMMARY="Platform for building and running PHP $PHP_VERSION applications" \
@@ -33,21 +33,36 @@ LABEL summary="${SUMMARY}" \
       io.openshift.tags="builder,${NAME},${NAME}${PHP_VER_SHORT},rh-${NAME}${PHP_VER_SHORT}" \
       io.openshift.s2i.scripts-url="image:///usr/libexec/s2i" \
       io.s2i.scripts-url="image:///usr/libexec/s2i" \
-      name="centos/${NAME}-${PHP_VER_SHORT}-centos7" \
-      com.redhat.component="rh-${NAME}${PHP_VER_SHORT}-container" \
+      name="morozovgroup/${NAME}-${PHP_VER_SHORT}-centos7" \
+      com.redhat.component="${NAME}${PHP_VER_SHORT}-container" \
       version="${PHP_VERSION}" \
       help="For more information visit https://github.com/sclorg/s2i-${NAME}-container" \
-      usage="s2i build https://github.com/sclorg/s2i-php-container.git --context-dir=${PHP_VERSION}/test/test-app centos/${NAME}-${PHP_VER_SHORT}-centos7 sample-server" \
-      maintainer="SoftwareCollections.org <sclorg@redhat.com>"
+      usage="s2i build https://github.com/morozov-group/s2i-php-container.git --context-dir=${PHP_VERSION}/test/test-app morozovgroup/${NAME}-${PHP_VER_SHORT}-centos7 sample-server" \
+      maintainer="Morozov Group <tech@morozov.group>"
 
 # Install Apache httpd and PHP
-RUN yum install -y centos-release-scl && \
+RUN yum install -y centos-release-scl epel-release && \
     INSTALL_PKGS="rh-php72 rh-php72-php rh-php72-php-mysqlnd rh-php72-php-pgsql rh-php72-php-bcmath \
+                  sclo-php72-php-pecl-imagick sclo-php72-php-pecl-memcached \
+                  rh-php72-php-devel boost-devel libtool devtoolset-7-gcc-c++ \
                   rh-php72-php-gd rh-php72-php-intl rh-php72-php-ldap rh-php72-php-mbstring rh-php72-php-pdo \
                   rh-php72-php-process rh-php72-php-soap rh-php72-php-opcache rh-php72-php-xml \
                   rh-php72-php-gmp rh-php72-php-pecl-apcu httpd24-mod_ssl" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS --nogpgcheck && \
     rpm -V $INSTALL_PKGS && \
+    yum clean all -y
+
+# install ProtoBuf and Mysql XAPI
+RUN cd /usr/tmp && \
+    git clone https://github.com/google/protobuf.git && \
+    cd protobuf && \
+    echo "./autogen.sh && ./configure && make && make install && pecl install mysql_xdevapi" | scl enable devtoolset-7 - && \
+    echo "extension=mysql_xdevapi.so" > /etc/opt/rh/rh-php72/php.d/30-mysql_xdevapi.ini
+
+# NewRelic installation
+RUN rpm -Uvh http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm && \
+    yum install -y newrelic-php5 && \
+    newrelic-install install && echo "Installed NewRelic" && \
     yum clean all -y
 
 ENV PHP_CONTAINER_SCRIPTS_PATH=/usr/share/container-scripts/php/ \
@@ -69,6 +84,8 @@ COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 
 # Copy extra files to the image.
 COPY ./root/ /
+
+RUN rm -rf /tmp/.newrelic.sock
 
 # Reset permissions of filesystem to default values
 RUN /usr/libexec/container-setup && rpm-file-permissions
