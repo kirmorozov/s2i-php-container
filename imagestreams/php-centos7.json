@@ -14,15 +14,15 @@
         "annotations": {
           "openshift.io/display-name": "PHP (Latest)",
           "openshift.io/provider-display-name": "Red Hat, Inc.",
-          "description": "Build and run PHP applications on CentOS 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-php-container/blob/master/7.1/README.md.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of PHP available on OpenShift, including major versions updates.",
+          "description": "Build and run PHP applications on CentOS 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-php-container/blob/master/7.2/README.md.\n\nWARNING: By selecting this tag, your application will automatically update to use the latest version of PHP available on OpenShift, including major versions updates.",
           "iconClass": "icon-php",
           "tags": "builder,php",
           "supports":"php",
-          "sampleRepo": "https://github.com/openshift/cakephp-ex.git"
+          "sampleRepo": "https://github.com/sclorg/cakephp-ex.git"
         },
         "from": {
           "kind": "ImageStreamTag",
-          "name": "7.1"
+          "name": "7.2"
         },
         "referencePolicy": {
           "type": "Local"
@@ -38,7 +38,7 @@
           "tags": "hidden,builder,php",
           "supports":"php:5.5,php",
           "version": "5.5",
-          "sampleRepo": "https://github.com/openshift/cakephp-ex.git"
+          "sampleRepo": "https://github.com/sclorg/cakephp-ex.git"
         },
         "from": {
           "kind": "DockerImage",
@@ -58,7 +58,7 @@
           "tags": "hidden,builder,php",
           "supports":"php:5.6,php",
           "version": "5.6",
-          "sampleRepo": "https://github.com/openshift/cakephp-ex.git"
+          "sampleRepo": "https://github.com/sclorg/cakephp-ex.git"
         },
         "from": {
           "kind": "DockerImage",
@@ -78,7 +78,7 @@
           "tags": "builder,php",
           "supports":"php:7.0,php",
           "version": "7.0",
-          "sampleRepo": "https://github.com/openshift/cakephp-ex.git"
+          "sampleRepo": "https://github.com/sclorg/cakephp-ex.git"
         },
         "from": {
           "kind": "DockerImage",
@@ -98,11 +98,31 @@
           "tags": "builder,php",
           "supports":"php:7.1,php",
           "version": "7.1",
-          "sampleRepo": "https://github.com/openshift/cakephp-ex.git"
+          "sampleRepo": "https://github.com/sclorg/cakephp-ex.git"
         },
         "from": {
           "kind": "DockerImage",
           "name": "docker.io/centos/php-71-centos7:latest"
+        },
+        "referencePolicy": {
+          "type": "Local"
+        }
+      },
+      {
+        "name": "7.2",
+        "annotations": {
+          "openshift.io/display-name": "PHP 7.2",
+          "openshift.io/provider-display-name": "Red Hat, Inc.",
+          "description": "Build and run PHP 7.2 applications on CentOS 7. For more information about using this builder image, including OpenShift considerations, see https://github.com/sclorg/s2i-php-container/blob/master/7.2/README.md.",
+          "iconClass": "icon-php",
+          "tags": "builder,php",
+          "supports":"php:7.2,php",
+          "version": "7.2",
+          "sampleRepo": "https://github.com/sclorg/cakephp-ex.git"
+        },
+        "from": {
+          "kind": "DockerImage",
+          "name": "docker.io/centos/php-72-centos7:latest"
         },
         "referencePolicy": {
           "type": "Local"
