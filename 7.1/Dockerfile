@@ -13,8 +13,7 @@ EXPOSE 8443
 
 ENV PHP_VERSION=7.1 \
     PHP_VER_SHORT=71 \
-    NAME=mage-php \
-    PATH=$PATH:/opt/rh/rh-php71/root/usr/bin
+    NAME=mage
 
 ENV SUMMARY="Platform for building and running PHP $PHP_VERSION applications" \
     DESCRIPTION="PHP $PHP_VERSION available as container is a base platform for \
@@ -30,7 +29,7 @@ LABEL summary="${SUMMARY}" \
       io.k8s.description="${DESCRIPTION}" \
       io.k8s.display-name="Apache 2.4 with PHP ${PHP_VERSION}" \
       io.openshift.expose-services="8080:http" \
-      io.openshift.tags="builder,${NAME},${NAME}${PHP_VER_SHORT},rh-${NAME}${PHP_VER_SHORT}" \
+      io.openshift.tags="builder,${NAME},${NAME}${PHP_VER_SHORT},${NAME}${PHP_VER_SHORT}" \
       io.openshift.s2i.scripts-url="image:///usr/libexec/s2i" \
       io.s2i.scripts-url="image:///usr/libexec/s2i" \
       name="morozovgroup/${NAME}-${PHP_VER_SHORT}-centos7" \
@@ -40,44 +39,36 @@ LABEL summary="${SUMMARY}" \
       usage="s2i build https://github.com/morozov-group/s2i-php-container.git --context-dir=${PHP_VERSION}/test/test-app morozovgroup/${NAME}-${PHP_VER_SHORT}-centos7 sample-server" \
       maintainer="Morozov Group <tech@morozov.group>"
 
-# Install Apache httpd and PHP
-RUN yum install -y centos-release-scl epel-release && \
-    INSTALL_PKGS="rh-php71 rh-php71-php rh-php71-php-mysqlnd rh-php71-php-pgsql rh-php71-php-bcmath \
-                  sclo-php71-php-mcrypt sclo-php71-php-pecl-imagick sclo-php71-php-pecl-redis sclo-php71-php-pecl-memcached \
-                  rh-php71-php-devel boost-devel libtool devtoolset-7-gcc-c++ \
-                  rh-php71-php-gd rh-php71-php-intl rh-php71-php-ldap rh-php71-php-mbstring rh-php71-php-pdo \
-                  rh-php71-php-process rh-php71-php-soap rh-php71-php-opcache rh-php71-php-xml \
-                  rh-php71-php-gmp rh-php71-php-pecl-apcu httpd24-mod_ssl" && \
+# Install Apache httpd and PHP and nodejs 10
+RUN yum install -y epel-release yum-utils && \
+    yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm && \
+    yum-config-manager --enable epel && \
+    yum-config-manager --enable remi && \
+    yum-config-manager --enable remi-php71 && \
+    yum remove -y ${NODEJS_SCL}\* && \
+    curl -sL https://rpm.nodesource.com/setup_10.x | bash - && \
+    INSTALL_PKGS="php php-cli php-mcrypt php-mysqlnd php-pgsql php-bcmath \
+                  php-pecl-imagick php-pecl-memcached \
+                  php-gd php-intl php-ldap php-mbstring php-pdo \
+                  php-process php-soap php-opcache php-xml \
+                  php-pear php-pecl-mysql-xdevapi newrelic-php5 \
+                  php-gmp php-pecl-apcu mod_ssl nodejs" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS --nogpgcheck && \
     rpm -V $INSTALL_PKGS && \
     yum clean all -y
 
-# install ProtoBuf and Mysql XAPI
-RUN cd /usr/tmp && \
-    git clone https://github.com/google/protobuf.git && \
-    cd protobuf && \
-    echo "./autogen.sh && ./configure && make && make install && pecl install mysql_xdevapi" | scl enable devtoolset-7 - && \
-    echo "extension=mysql_xdevapi.so" > /etc/opt/rh/rh-php71/php.d/30-mysql_xdevapi.ini
-
-# NewRelic installation
-RUN rpm -Uvh http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm && \
-    yum install -y newrelic-php5 && \
-    newrelic-install install && echo "Installed NewRelic" && \
-    yum clean all -y
-
 ENV PHP_CONTAINER_SCRIPTS_PATH=/usr/share/container-scripts/php/ \
     APP_DATA=${APP_ROOT}/src \
-    PHP_DEFAULT_INCLUDE_PATH=/opt/rh/rh-php71/root/usr/share/pear \
-    PHP_SYSCONF_PATH=/etc/opt/rh/rh-php71 \
-    PHP_HTTPD_CONF_FILE=rh-php71-php.conf \
+    PHP_DEFAULT_INCLUDE_PATH=/usr/share/pear \
+    PHP_SYSCONF_PATH=/etc \
+    PHP_HTTPD_CONF_FILE=php.conf \
     HTTPD_CONFIGURATION_PATH=${APP_ROOT}/etc/conf.d \
     HTTPD_MAIN_CONF_PATH=/etc/httpd/conf \
     HTTPD_MAIN_CONF_D_PATH=/etc/httpd/conf.d \
     HTTPD_VAR_RUN=/var/run/httpd \
     HTTPD_DATA_PATH=/var/www \
-    HTTPD_DATA_ORIG_PATH=/opt/rh/httpd24/root/var/www \
-    HTTPD_VAR_PATH=/opt/rh/httpd24/root/var \
-    SCL_ENABLED=rh-php71
+    HTTPD_DATA_ORIG_PATH=/var/www \
+    HTTPD_VAR_PATH=/var
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
@@ -88,7 +79,7 @@ COPY ./root/ /
 RUN rm -rf /tmp/.newrelic.sock
 
 # Reset permissions of filesystem to default values
-RUN /usr/libexec/container-setup && rpm-file-permissions
+RUN /usr/libexec/container-setup && rpm-file-permissions && touch /opt/app-root/etc/scl_enable
 
 USER 1001
 
