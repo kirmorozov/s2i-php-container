@@ -51,7 +51,7 @@ RUN yum install -y epel-release yum-utils && \
                   php-pecl-imagick php-pecl-memcached \
                   php-gd php-intl php-ldap php-mbstring php-pdo \
                   php-process php-soap php-opcache php-xml \
-                  php-pear php-pecl-mysql-xdevapi newrelic-php5 \
+                  php-pear php-pecl-mysql-xdevapi newrelic-php5 php-zip \
                   php-gmp php-pecl-apcu mod_ssl nodejs" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS --nogpgcheck && \
     rpm -V $INSTALL_PKGS && \
