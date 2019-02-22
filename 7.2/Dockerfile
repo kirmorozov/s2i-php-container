@@ -39,12 +39,14 @@ LABEL summary="${SUMMARY}" \
       usage="s2i build https://github.com/morozov-group/s2i-php-container.git --context-dir=${PHP_VERSION}/test/test-app morozovgroup/${NAME}-${PHP_VER_SHORT}-centos7 sample-server" \
       maintainer="Morozov Group <tech@morozov.group>"
 
-# Install Apache httpd and PHP
+# Install Apache httpd and PHP and nodejs 10
 RUN yum install -y epel-release yum-utils && \
     yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm && \
     yum-config-manager --enable epel && \
     yum-config-manager --enable remi && \
     yum-config-manager --enable remi-php72 && \
+    yum remove -y ${NODEJS_SCL}\* && \
+    curl -sL https://rpm.nodesource.com/setup_10.x | bash - && \
     INSTALL_PKGS="php php-cli php-mysqlnd  php-pgsql php-bcmath \
                   php-pecl-imagick php-pecl-memcached \
                   php-gd php-intl php-ldap php-mbstring php-pdo \
@@ -77,7 +79,7 @@ COPY ./root/ /
 RUN rm -rf /tmp/.newrelic.sock
 
 # Reset permissions of filesystem to default values
-RUN /usr/libexec/container-setup && rpm-file-permissions
+RUN /usr/libexec/container-setup && rpm-file-permissions && touch /opt/app-root/etc/scl_enable
 
 USER 1001
 
