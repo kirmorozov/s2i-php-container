@@ -76,7 +76,9 @@ COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 # Copy extra files to the image.
 COPY ./root/ /
 
-RUN rm -rf /tmp/.newrelic.sock
+RUN rm -rf /tmp/.newrelic.sock && \
+    chmod 777 ${PHP_SYSCONF_PATH}/php.ini && \
+    npm install -g gulp-cli grunt-cli && npm cache clean
 
 # Reset permissions of filesystem to default values
 RUN /usr/libexec/container-setup && rpm-file-permissions && touch /opt/app-root/etc/scl_enable
