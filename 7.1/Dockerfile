@@ -78,7 +78,7 @@ COPY ./root/ /
 
 RUN rm -rf /tmp/.newrelic.sock && \
     chmod 777 ${PHP_SYSCONF_PATH}/php.ini && \
-    npm install -g gulp-cli grunt-cli && npm cache clean
+    npm install -g gulp-cli grunt-cli && npm cache clean --force
 
 # Reset permissions of filesystem to default values
 RUN /usr/libexec/container-setup && rpm-file-permissions && touch /opt/app-root/etc/scl_enable
