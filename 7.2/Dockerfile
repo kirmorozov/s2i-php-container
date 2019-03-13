@@ -40,7 +40,7 @@ LABEL summary="${SUMMARY}" \
       maintainer="Morozov Group <tech@morozov.group>"
 
 # Install Apache httpd and PHP and nodejs 10
-RUN yum install -y epel-release yum-utils && \
+RUN yum install -y epel-release yum-utils mc && \
     yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm && \
     yum-config-manager --enable epel && \
     yum-config-manager --enable remi && \
