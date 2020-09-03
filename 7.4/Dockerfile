@@ -46,7 +46,7 @@ RUN yum install -y epel-release yum-utils && \
     yum-config-manager --enable remi && \
     yum-config-manager --enable remi-php74 && \
     yum remove -y ${NODEJS_SCL}\* && \
-    curl -sL https://rpm.nodesource.com/setup_10.x | bash - && \
+    curl -sL https://rpm.nodesource.com/setup_12.x | bash - && \
     INSTALL_PKGS="php php-cli php-mysqlnd  php-pgsql php-bcmath \
                   php-pecl-imagick php-pecl-memcached \
                   php-gd php-intl php-ldap php-mbstring php-pdo \
