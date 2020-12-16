@@ -28,7 +28,7 @@ if [ -f composer.json ]; then
     echo "Download failed, giving up."
     exit 1
   fi
-  php <$TEMPFILE
+  php <$TEMPFILE -- --1
 
   if [ "$(ls -a /tmp/artifacts/ 2>/dev/null)" ]; then
     echo "Restoring build artifacts"

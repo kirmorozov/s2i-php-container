@@ -13,8 +13,7 @@ EXPOSE 8443
 
 ENV PHP_VERSION=7.0 \
     PHP_VER_SHORT=70 \
-    NAME=php \
-    PATH=$PATH:/opt/rh/rh-php70/root/usr/bin
+    NAME=mage
 
 ENV SUMMARY="Platform for building and running PHP $PHP_VERSION applications" \
     DESCRIPTION="PHP $PHP_VERSION available as container is a base platform for \
@@ -30,39 +29,46 @@ LABEL summary="${SUMMARY}" \
       io.k8s.description="${DESCRIPTION}" \
       io.k8s.display-name="Apache 2.4 with PHP ${PHP_VERSION}" \
       io.openshift.expose-services="8080:http" \
-      io.openshift.tags="builder,${NAME},${NAME}${PHP_VER_SHORT},rh-${NAME}${PHP_VER_SHORT}" \
+      io.openshift.tags="builder,${NAME},${NAME}${PHP_VER_SHORT},${NAME}${PHP_VER_SHORT}" \
       io.openshift.s2i.scripts-url="image:///usr/libexec/s2i" \
       io.s2i.scripts-url="image:///usr/libexec/s2i" \
-      name="centos/${NAME}-${PHP_VER_SHORT}-centos7" \
-      com.redhat.component="rh-${NAME}${PHP_VER_SHORT}-container" \
+      name="morozovgroup/${NAME}-${PHP_VER_SHORT}-centos7" \
+      com.redhat.component="${NAME}${PHP_VER_SHORT}-container" \
       version="${PHP_VERSION}" \
       help="For more information visit https://github.com/sclorg/s2i-${NAME}-container" \
-      usage="s2i build https://github.com/sclorg/s2i-php-container.git --context-dir=${PHP_VERSION}/test/test-app centos/${NAME}-${PHP_VER_SHORT}-centos7 sample-server" \
-      maintainer="SoftwareCollections.org <sclorg@redhat.com>"
+      usage="s2i build https://github.com/morozov-group/s2i-php-container.git --context-dir=${PHP_VERSION}/test/test-app morozovgroup/${NAME}-${PHP_VER_SHORT}-centos7 sample-server" \
+      maintainer="Morozov Group <tech@morozov.group>"
 
-# Install Apache httpd and PHP
-RUN yum install -y centos-release-scl && \
-    INSTALL_PKGS="rh-php70 rh-php70-php rh-php70-php-mysqlnd rh-php70-php-pgsql rh-php70-php-bcmath \
-                  rh-php70-php-gd rh-php70-php-intl rh-php70-php-ldap rh-php70-php-mbstring rh-php70-php-pdo \
-                  rh-php70-php-process rh-php70-php-soap rh-php70-php-opcache rh-php70-php-xml \
-                  rh-php70-php-gmp httpd24-mod_ssl" && \
+# Install Apache httpd and PHP and nodejs 10
+RUN yum install -y epel-release yum-utils && \
+    yum install -y http://rpms.remirepo.net/enterprise/remi-release-7.rpm http://yum.newrelic.com/pub/newrelic/el5/x86_64/newrelic-repo-5-3.noarch.rpm && \
+    yum-config-manager --enable epel && \
+    yum-config-manager --enable remi && \
+    yum-config-manager --enable remi-php70 && \
+    yum remove -y ${NODEJS_SCL}\* && \
+    curl -sL https://rpm.nodesource.com/setup_12.x | bash - && \
+    INSTALL_PKGS="php php-cli php-mysqlnd  php-pgsql php-bcmath \
+                  php-pecl-imagick php-pecl-memcached \
+                  php-gd php-intl php-ldap php-mbstring php-pdo \
+                  php-process php-soap php-opcache php-xml \
+                  php-pear php-pecl-mysql-xdevapi newrelic-php5 php-pecl-zip \
+                  php-gmp php-pecl-apcu mod_ssl nodejs msmtp" && \
     yum install -y --setopt=tsflags=nodocs $INSTALL_PKGS --nogpgcheck && \
     rpm -V $INSTALL_PKGS && \
     yum clean all -y
 
 ENV PHP_CONTAINER_SCRIPTS_PATH=/usr/share/container-scripts/php/ \
     APP_DATA=${APP_ROOT}/src \
-    PHP_DEFAULT_INCLUDE_PATH=/opt/rh/rh-php70/root/usr/share/pear \
-    PHP_SYSCONF_PATH=/etc/opt/rh/rh-php70 \
-    PHP_HTTPD_CONF_FILE=rh-php70-php.conf \
+    PHP_DEFAULT_INCLUDE_PATH=/usr/share/pear \
+    PHP_SYSCONF_PATH=/etc \
+    PHP_HTTPD_CONF_FILE=php.conf \
     HTTPD_CONFIGURATION_PATH=${APP_ROOT}/etc/conf.d \
     HTTPD_MAIN_CONF_PATH=/etc/httpd/conf \
     HTTPD_MAIN_CONF_D_PATH=/etc/httpd/conf.d \
     HTTPD_VAR_RUN=/var/run/httpd \
     HTTPD_DATA_PATH=/var/www \
-    HTTPD_DATA_ORIG_PATH=/opt/rh/httpd24/root/var/www \
-    HTTPD_VAR_PATH=/opt/rh/httpd24/root/var \
-    SCL_ENABLED=rh-php70
+    HTTPD_DATA_ORIG_PATH=/var/www \
+    HTTPD_VAR_PATH=/var
 
 # Copy the S2I scripts from the specific language image to $STI_SCRIPTS_PATH
 COPY ./s2i/bin/ $STI_SCRIPTS_PATH
@@ -70,8 +76,12 @@ COPY ./s2i/bin/ $STI_SCRIPTS_PATH
 # Copy extra files to the image.
 COPY ./root/ /
 
+RUN rm -rf /tmp/.newrelic.sock && \
+    chmod 777 ${PHP_SYSCONF_PATH}/php.ini && \
+    npm install -g gulp-cli grunt-cli && npm cache clean --force
+
 # Reset permissions of filesystem to default values
-RUN /usr/libexec/container-setup && rpm-file-permissions
+RUN /usr/libexec/container-setup && rpm-file-permissions && touch /opt/app-root/etc/scl_enable
 
 USER 1001
 
