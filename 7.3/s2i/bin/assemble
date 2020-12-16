@@ -17,18 +17,17 @@ if [ -f composer.json ]; then
   for ((i=0; i<$RETRIES; i++)); do
 
     if [ -z "$COMPOSER_INSTALLER" ]; then
-      export COMPOSER_INSTALLER="https://getcomposer.org/installer"
+      export COMPOSER_INSTALLER="https://getcomposer.org/composer-1.phar"
     fi
 
     echo "Downloading $COMPOSER_INSTALLER, attempt $((i+1))/$RETRIES"
-    curl -o $TEMPFILE $COMPOSER_INSTALLER && break
+    curl -o ./composer.phar $COMPOSER_INSTALLER && break
     sleep 10
   done
   if [[ $i == $RETRIES ]]; then
     echo "Download failed, giving up."
     exit 1
   fi
-  php <$TEMPFILE
 
   if [ "$(ls -a /tmp/artifacts/ 2>/dev/null)" ]; then
     echo "Restoring build artifacts"
