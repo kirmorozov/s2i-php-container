@@ -21,13 +21,15 @@ if [ -f composer.json ]; then
     fi
 
     echo "Downloading $COMPOSER_INSTALLER, attempt $((i+1))/$RETRIES"
-    curl -o $HOME/composer.phar $COMPOSER_INSTALLER && break
+    curl -o ./composer.phar $COMPOSER_INSTALLER && break
     sleep 10
   done
   if [[ $i == $RETRIES ]]; then
     echo "Download failed, giving up."
     exit 1
   fi
+  
+  chmod +x ./composer.phar
 
   if [ "$(ls -a /tmp/artifacts/ 2>/dev/null)" ]; then
     echo "Restoring build artifacts"
