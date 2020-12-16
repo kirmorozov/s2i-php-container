@@ -21,7 +21,7 @@ if [ -f composer.json ]; then
     fi
 
     echo "Downloading $COMPOSER_INSTALLER, attempt $((i+1))/$RETRIES"
-    curl -o ./composer.phar $COMPOSER_INSTALLER && break
+    curl -o $HOME/composer.phar $COMPOSER_INSTALLER && break
     sleep 10
   done
   if [[ $i == $RETRIES ]]; then
